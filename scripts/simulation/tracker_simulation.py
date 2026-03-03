@@ -11,11 +11,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 from ultralytics import YOLO
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Configuration
 WIDTH, HEIGHT = 1000, 800
 FPS = 30
-YAML_FILE = "trajectories.yaml"
-MODEL_PATH = "/home/luisgs44/pigeon_detection/PigeonColor.v1i.yolov11/runs/segment/runs/train/birds_test_run/weights/best.pt"
+YAML_FILE = os.path.join(SCRIPT_DIR, "config", "trajectories.yaml")
+MODEL_PATH = os.path.join(SCRIPT_DIR, "..", "..", "config/yolo/evf.pt")
 CONFIDENCE = 0.45 
 METRIC_THRESHOLD = 50.0 
 
@@ -24,9 +26,8 @@ VISUALIZATION = True
 SAVE_VIDEO = False   
 
 # Paths
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-NANO_BACKBONE_PATH = os.path.join(SCRIPT_DIR, "nano_tracker", "nanotrack_backbone_sim.onnx")
-NANO_HEAD_PATH = os.path.join(SCRIPT_DIR, "nano_tracker", "nanotrack_head_sim.onnx")
+NANO_BACKBONE_PATH = os.path.join(SCRIPT_DIR, "config", "nano_tracker", "nanotrack_backbone_sim.onnx")
+NANO_HEAD_PATH = os.path.join(SCRIPT_DIR, "config", "nano_tracker", "nanotrack_head_sim.onnx")
 
 # Strict bounds
 def is_strictly_in_bounds(bbox):
@@ -149,7 +150,7 @@ class YamlBird(pygame.sprite.Sprite):
         self.sprites = []
         try:
             for i in range(1, 6):
-                img = pygame.image.load(f"images_animation/bird{i}.png").convert_alpha()
+                img = pygame.image.load(os.path.join(SCRIPT_DIR, "config", "images_animation", f"bird{i}.png")).convert_alpha()
                 self.sprites.append(img)
         except:
             s = pygame.Surface((40,40)); s.fill((0,0,0)); self.sprites = [s]
@@ -188,7 +189,7 @@ def main():
     else:
         screen = pygame.display.set_mode((WIDTH, HEIGHT), flags=pygame.HIDDEN)
 
-    pygame.display.set_caption("IROS BENCHMARK RUNNER")
+    pygame.display.set_caption("BENCHMARK RUNNER")
     font = pygame.font.SysFont("Arial", 12, bold=True)
     
     print("Loading YOLO...")
@@ -315,7 +316,7 @@ def main():
                 for t in my_results_raw:
                     bx = t['bbox']
                     pygame.draw.rect(screen, (0, 255, 0), (bx[0], bx[1], bx[2]-bx[0], bx[3]-bx[1]), 3)
-                    screen.blit(font.render(f"ME:{t['id']}", True, (0,150,0)), (bx[0], bx[1]-15))
+                    screen.blit(font.render(f"MOE:{t['id']}", True, (0,150,0)), (bx[0], bx[1]-15))
                 
                 def draw_box(res, color, label, offset):
                     for _, box in enumerate(res):
@@ -360,8 +361,9 @@ def main():
     df = pd.DataFrame(full_metrics)
 
     # Save to CSV with the new 'traj' column included
-    df.to_csv('benchmark_results.csv', index=False)
-    print("File 'benchmark_results.csv' saved successfully.")
+    csv_path = os.path.join(SCRIPT_DIR, "../../csv/benchmark_results.csv")
+    df.to_csv(csv_path, index=False)
+    print(f"File '{csv_path}' saved successfully.")
     
     # Overall
     summary = df.groupby('Tracker').agg(
@@ -377,60 +379,6 @@ def main():
     pivot_table = df.pivot_table(index='Scenario', columns='Tracker', values='Success', aggfunc='mean') * 100
     print("\nRobustness per scenario (%):")
     print(pivot_table.to_string(float_format="%.1f"))
-
-    try:
-        # Set the backend to PGF
-        matplotlib.use("pgf")
-        matplotlib.rcParams.update({
-            "pgf.texsystem": "pdflatex",
-            "font.family": "serif",
-            "text.usetex": True,
-            "pgf.rcfonts": False,
-        })
-
-        sns.set_theme(style="whitegrid")
-        
-        # Precision Plot 
-        plt.figure(figsize=(5, 3)) 
-        sns.barplot(data=df, x='Tracker', y='Error', palette="viridis", errorbar=None)
-        plt.ylabel('Mean Error (px)')
-        plt.xlabel('Tracking Algorithm')
-        plt.tight_layout()
-        plt.savefig('benchmark_precision.pgf') 
-
-        # Robustness Plot 
-        plt.figure(figsize=(16, 9)) # Increased height slightly to accommodate legend below
-
-        scen_sum = df.groupby(['Scenario', 'Tracker'])['Success'].mean().reset_index()
-        scen_sum['Success'] *= 100
-        
-        # Create the barplot
-        ax = sns.barplot(data=scen_sum, x='Scenario', y='Success', hue='Tracker')
-        
-        ax.set_ylabel('')
-        ax.set_xlabel('')
-        
-        ax.tick_params(axis='both', which='major', labelsize=28)
-        # Determine number of trackers for horizontal layout
-        num_trackers = scen_sum['Tracker'].nunique()
-        
-        # Position legend below the plot (loc='upper center', bbox_to_anchor=(0.5, -0.2))
-        plt.legend(
-            title='', 
-            loc='upper center', 
-            bbox_to_anchor=(0.5, -0.1), 
-            ncol=num_trackers, 
-            frameon=True,
-            fontsize=24
-        )
-        
-        plt.tight_layout()
-        
-        # Save the figure
-        plt.savefig('benchmark_robustness.pgf', bbox_inches='tight')
-        plt.savefig('benchmark_robustness.png', dpi=300, bbox_inches='tight')
-    except Exception as e:
-        print(f"Failed to save PGF plots: {e}")
 
 if __name__ == "__main__":
     main()

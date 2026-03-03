@@ -96,7 +96,36 @@ Integrates the full workflow from tracking files to final statistics.
 ```bash
 python scripts/main.py --left_raw path/to/left.raw --right_raw path/to/right.raw --clip CLIP_ID --mode event_frame
 ```
+---
+# Tracker Simulation Benchmark
 
+### What it does
+
+- Loads trajectories from `config/trajectories.yaml`
+- Animates birds in `pygame`
+- Runs multiple trackers in parallel:
+  - **MOE (Ours)** – Custom velocity-based tracker
+  - **CSRT**
+  - **KCF**
+  - **NANO**
+- Compares predictions against ground truth
+- Exports metrics and plots
+
+### Metrics
+
+- **Precision (px)** → Mean center error  
+- **Robustness (%)** → % of frames with error < 50 px  
+
+For fast mode (no rendering):
+
+```python
+VISUALIZATION = False
+```
+
+### Run
+
+```bash
+python benchmark_simulation.py
 ---
 # Installation and Requirements
 

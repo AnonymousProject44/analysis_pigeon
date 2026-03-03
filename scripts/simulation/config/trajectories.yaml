@@ -1,0 +1,80 @@
+scenarios:
+  - name: "01"
+    description: "4 birds from corners crossing exactly in the center."
+    birds:
+      - {start: [50, 50], end: [950, 750], speed: 5}
+      - {start: [950, 50], end: [50, 750], speed: 5}
+      - {start: [50, 750], end: [950, 50], speed: 5}
+      - {start: [950, 750], end: [50, 50], speed: 5}
+
+  - name: "02"
+    description: "2 birds go horizontal, 2 vertical. They meet at (500, 400)."
+    birds:
+      - {start: [500, 50], end: [500, 750], speed: 4} # Vertical Down
+      - {start: [500, 750], end: [500, 50], speed: 4} # Vertical Up
+      - {start: [50, 400], end: [950, 400], speed: 6} # Horizontal Right
+      - {start: [950, 400], end: [50, 400], speed: 6} # Horizontal Left
+
+  - name: "03"
+    description: "Slow birds are overtaken by fast birds on the same line."
+    birds:
+      - {start: [50, 300], end: [950, 300], speed: 3} # Slow
+      - {start: [50, 300], end: [950, 300], speed: 6} # Fast (Overtakes)
+      - {start: [950, 500], end: [50, 500], speed: 3} # Slow
+      - {start: [950, 500], end: [50, 500], speed: 6} # Fast (Overtakes)
+
+  - name: "04"
+    description: "Birds start from mid-points of edges and converge to center."
+    birds:
+      - {start: [500, 50], end: [500, 750], speed: 5}
+      - {start: [50, 400], end: [950, 400], speed: 5}
+      - {start: [950, 400], end: [50, 400], speed: 5}
+      - {start: [500, 750], end: [500, 50], speed: 5}
+
+  - name: "05"
+    description: "Two pairs of parallel birds crossing diagonally."
+    birds:
+      - {start: [50, 50], end: [950, 750], speed: 5}
+      - {start: [150, 50], end: [1000, 700], speed: 5} # Parallel to 1
+      - {start: [950, 50], end: [50, 750], speed: 5}
+      - {start: [850, 50], end: [0, 700], speed: 5}   # Parallel to 3
+
+  - name: "06"
+    description: "All birds head to a single point (600, 400) and stop."
+    birds:
+      - {start: [200, 200], end: [1000, 600], speed: 4}
+      - {start: [200, 600], end: [1000, 200], speed: 4}
+      - {start: [1000, 200], end: [200, 600], speed: 4}
+      - {start: [1000, 600], end: [200, 200], speed: 4}
+
+  - name: "07"
+    description: "Birds flying in very close parallel lines creating partial occlusion."
+    birds:
+      - {start: [50, 350], end: [950, 350], speed: 5}
+      - {start: [50, 370], end: [950, 370], speed: 5.2} # Slightly faster, slightly lower
+      - {start: [950, 390], end: [50, 390], speed: 5}
+      - {start: [950, 410], end: [50, 410], speed: 5.2}
+
+  - name: "08"
+    description: "Random paths that intersect at different times."
+    birds:
+      - {start: [100, 100], end: [900, 700], speed: 4}
+      - {start: [400, 50], end: [400, 750], speed: 6}
+      - {start: [900, 300], end: [100, 500], speed: 5}
+      - {start: [50, 700], end: [900, 100], speed: 7}
+
+  - name: "09"
+    description: "Very slow movement to test tracker ID persistence over long occlusion."
+    birds:
+      - {start: [50, 400], end: [950, 400], speed: 2}
+      - {start: [950, 400], end: [50, 400], speed: 2} # Head on collision
+      - {start: [500, 50], end: [500, 750], speed: 2}
+      - {start: [500, 750], end: [500, 50], speed: 2}
+
+  - name: "10"
+    description: "4 birds starting very close and spreading out."
+    birds:
+      - {start: [480, 400], end: [50, 50], speed: 3}
+      - {start: [500, 400], end: [950, 50], speed: 3}
+      - {start: [520, 400], end: [950, 750], speed: 3}
+      - {start: [500, 420], end: [50, 750], speed: 3}
