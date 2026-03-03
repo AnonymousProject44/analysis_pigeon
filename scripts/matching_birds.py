@@ -137,9 +137,9 @@ def estimate_wingbeat(df_bird, fs=200.0):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('left_csv', type=str, default="006")
-    parser.add_argument('right_csv', type=str, default="006")
-    parser.add_argument('--clip', type=str, default="clip_006")
+    parser.add_argument('left_csv', type=str, default="../csv/tracking_ev_clip_006_left.csv", help="Path to the tracking CSV for the left camera")
+    parser.add_argument('right_csv', type=str, default="../csv/tracking_ev_clip_006_right.csv", help="Path to the tracking CSV for the right camera")
+    parser.add_argument('--clip', type=str, default="clip_006", help="Clip ID")
     parser.add_argument('--mode', type=str, default='event_frame')
     args = parser.parse_args()
 
@@ -200,7 +200,7 @@ if __name__ == "__main__":
             
             df_stats = pd.DataFrame(stats)
             df_out.to_csv(output_csv, index=False)
-            stats_csv = os.path.join(SCRIPT_DIR, f"../csv/matching_{args.clip}_{suffix}.csv")
+            stats_csv = os.path.join(SCRIPT_DIR, f"../csv/bird_stats_{args.clip}_{suffix}.csv")
             df_stats.to_csv(stats_csv, index=False)
             print(f"Global Avg Wingbeat: {df_stats['wingbeat_hz'].median():.2f} Hz")
             print(df_stats)

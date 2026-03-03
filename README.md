@@ -49,6 +49,7 @@ Features:
 ### Parameters
 - `raw_file_path`
 - `--mode` → time_surface or event_frame
+- `--camera` → cCamera identifier (Left or Right)
 - `--dt` → Delta time in microseconds
 - `--save_csv` → true or false
 
@@ -75,8 +76,9 @@ It:
 - `--mode` → Processing mode
 
 ### Usage
+```bash
 python scripts/matching_birds.py csv/left.csv csv/right.csv --clip CLIP_ID --mode event_frame
-
+```
 ---
 # Full Pipeline & Biomechanical Analysis
 `scripts/main.py`
@@ -84,13 +86,15 @@ python scripts/matching_birds.py csv/left.csv csv/right.csv --clip CLIP_ID --mod
 Integrates the full workflow from tracking files to final statistics.
 
 ### Parameters
+`--left_raw` → Path to left raw file
+`--right_raw` → Path to right raw file
 `--clip` → Clip identifier
 `--mode` → Processing mode
 
 
 ### Usage
 ```bash
-python scripts/main.py --clip CLIP_ID --mode event_frame
+python scripts/main.py --left_raw path/to/left.raw --right_raw path/to/right.raw --clip CLIP_ID --mode event_frame
 ```
 
 ---

@@ -185,6 +185,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('raw_file', type=str, help="Choose .raw clip to process")
     parser.add_argument('--mode', type=str, default='event_frame', help="Mode of processing: 'time_surface' or 'event_frame'")
+    parser.add_argument('--camera', type=str, default='left', help="Processing camera: 'left' or 'right'")
     parser.add_argument('--dt', type=int, default=5000, help="Delta time in microseconds")
     parser.add_argument('--save_csv', type=str, default='true')
 
@@ -193,6 +194,9 @@ def main():
 
     if args.mode not in ['time_surface', 'event_frame']:
         print("Invalid mode choice. Use 'time_surface' or 'event_frame'.")
+        return
+    if args.camera not in ['left', 'right']:
+        print("Invalid camera choice. Use 'left' or 'right'.")
         return
 
     event_file_path = args.raw_file
@@ -208,7 +212,7 @@ def main():
 
     csv_dir = os.path.join(SCRIPT_DIR, "../csv")
     os.makedirs(csv_dir, exist_ok=True)
-    filename = os.path.join(csv_dir, f"tracking_{filetype}_{raw_name}.csv")
+    filename = os.path.join(csv_dir, f"tracking_{filetype}_{raw_name}_{args.camera}.csv")
 
     mv_it = EventsIterator(input_path=event_file_path, delta_t=dt)
     height, width = mv_it.get_size()

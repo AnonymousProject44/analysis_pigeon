@@ -276,8 +276,8 @@ def visualize_3d_trajectories(df_full):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("raw_l", type=str, default='clip_006')
-    parser.add_argument('raw_r', type=str, default='clip_006')
+    parser.add_argument("raw_l", type=str, help='Path to left raw file')
+    parser.add_argument('raw_r', type=str, help='Path to right raw file')
     parser.add_argument("--save_video", action="store_true")
     parser.add_argument('--clip', type=str, default='clip_006')
     parser.add_argument("--mode", type=str, default="event_frame")
