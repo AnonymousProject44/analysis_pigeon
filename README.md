@@ -126,6 +126,8 @@ VISUALIZATION = False
 
 ```bash
 python benchmark_simulation.py
+```
+
 ---
 # Installation and Requirements
 
