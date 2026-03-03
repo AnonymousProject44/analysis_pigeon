@@ -3,15 +3,18 @@ import numpy as np
 import cv2
 import argparse
 import yaml
+import sys
 import os
 from scipy.signal import savgol_filter
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.transform import Rotation as Rot
 from scipy.fft import rfft, rfftfreq
-from stereo_vis import BirdKalmanFilter
+from stereo_visualizer import BirdKalmanFilter
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Calibration geometry
-def load_calibration_data(config_dir="config"):
+def load_calibration_data(config_dir="../config/calibration/"):
     def load_yaml(filename):
         path = os.path.join(config_dir, filename)
         if not os.path.exists(path):
@@ -134,28 +137,29 @@ def estimate_wingbeat(df_bird, fs=200.0):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gt_mode', action='store_true')
-    parser.add_argument('--clip', type=str, default="006")
+    parser.add_argument('left_csv', type=str, default="006")
+    parser.add_argument('right_csv', type=str, default="006")
+    parser.add_argument('--clip', type=str, default="clip_006")
     parser.add_argument('--mode', type=str, default='event_frame')
     args = parser.parse_args()
 
+    if args.mode not in ['time_surface', 'event_frame']:
+        print("Invalid mode choice. Use 'time_surface' or 'event_frame'.")
+        sys.exit(1)
+    
     suffix = "ts" if args.mode == 'time_surface' else "evf"
-    left_csv = f"csv/bird_tracking_data_left_{args.clip}_{suffix}.csv"
-    right_csv = f"csv/bird_tracking_data_right_{args.clip}_{suffix}.csv"
-    output_csv = f"csv/bird_tracking_stereo_data_advanced_{args.clip}_{suffix}.csv"
-
+    output_csv = os.path.join(SCRIPT_DIR, f"../csv/matching_{args.clip}_{suffix}.csv")
+    config_dir = os.path.join(SCRIPT_DIR, "../config/calibration/")
     try:
-        df_l, df_r = pd.read_csv(left_csv), pd.read_csv(right_csv)
-        K1, D1, K2, D2, R, T, _, _, _, _ = load_calibration_data()
+        df_l, df_r = pd.read_csv(args.left_csv), pd.read_csv(args.right_csv)
+        K1, D1, K2, D2, R, T, _, _, _, _ = load_calibration_data(config_dir)
         (R1, P1), (R2, P2) = get_rectification_matrices(K1, D1, K2, D2, R, T)
         df_l, df_r = batch_rectify_points(df_l, K1, D1, R1, P1), batch_rectify_points(df_r, K2, D2, R2, P2)
         
-        if args.gt_mode:
-            results = pd.read_csv(f"csv/id_matches_gt_{args.clip}.csv")
-        else:
-            df_l, df_r = extract_features(df_l), extract_features(df_r)
-            results = match_stereo_tracks_advanced(df_l, df_r)
-            if not results.empty: results.to_csv(f"csv/id_matches_{args.clip}_{suffix}.csv", index=False)
+        df_l, df_r = extract_features(df_l), extract_features(df_r)
+        results = match_stereo_tracks_advanced(df_l, df_r)
+        matches_csv = os.path.join(SCRIPT_DIR, f"../csv/id_matches_{args.clip}_{suffix}.csv")
+        if not results.empty: results.to_csv(matches_csv, index=False)
 
         if not results.empty:
             stereo_data = []
@@ -184,7 +188,7 @@ if __name__ == "__main__":
                     sx, sy, sz = kf.filter_point(df_out.at[idx, 'x_m'], df_out.at[idx, 'y_m'], df_out.at[idx, 'z_m'])
                     df_out.at[idx, 'x_m_smooth'], df_out.at[idx, 'y_m_smooth'], df_out.at[idx, 'z_m_smooth'] = sx, sy, sz
 
-            # STATS CALCULATION
+            # Stats calculation
             stats = []
             for bid in unique_birds:
                 b_df = df_out[df_out['bird_id'] == bid].sort_values('timestamp')
@@ -196,7 +200,8 @@ if __name__ == "__main__":
             
             df_stats = pd.DataFrame(stats)
             df_out.to_csv(output_csv, index=False)
-            df_stats.to_csv(f"csv/bird_flight_stats_{args.clip}.csv", index=False)
+            stats_csv = os.path.join(SCRIPT_DIR, f"../csv/matching_{args.clip}_{suffix}.csv")
+            df_stats.to_csv(stats_csv, index=False)
             print(f"Global Avg Wingbeat: {df_stats['wingbeat_hz'].median():.2f} Hz")
             print(df_stats)
 

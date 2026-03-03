@@ -1,22 +1,6 @@
 import argparse
-import sys
 import os
-
-# Handle PGF backend before importing pyplot if requested
-if "--paper_plot" in sys.argv:
-    import matplotlib
-    if os.environ.get('DISPLAY', '') == '':
-        print('No display found. Using non-interactive Agg backend')
-        matplotlib.use('Agg')
-    else:
-        matplotlib.use("pgf")
-        matplotlib.rcParams.update({
-            "pgf.texsystem": "pdflatex",
-            'font.family': 'serif',
-            'text.usetex': True,
-            'pgf.rcfonts': False,
-        })
-
+import sys
 import cv2
 import numpy as np
 import pandas as pd
@@ -26,6 +10,8 @@ import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 from metavision_core.event_io import EventsIterator
 import re  
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class BirdKalmanFilter:
     def __init__(self, dt=0.005):
@@ -288,110 +274,28 @@ def visualize_3d_trajectories(df_full):
         import traceback
         traceback.print_exc()
 
-def save_paper_plot(df_full, output_prefix="trajectory_3d"):
-    print("Generating ULTRA COMPACT paper plot...")
-    
-    # Keep the figure wide and short
-    fig = plt.figure(figsize=(7, 5))
-    
-    # Avoid negative start points which cut off labels
-    ax = fig.add_axes([-0.05, -0.15, 1, 1], projection='3d')
-    cax = fig.add_axes([0.1, 0.80, 0.75, 0.05]) 
-
-    ax.set_facecolor('white')
-    fig.patch.set_facecolor('white')
-    ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-    ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-    ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
-    ax.grid(True, linestyle=':', alpha=0.3, color='gray')
-
-    t_min, t_max = df_full['timestamp'].min(), df_full['timestamp'].max()
-    norm = mcolors.Normalize(vmin=t_min, vmax=t_max)
-    cmap = cm.turbo
-
-    plot_xs, plot_ys, plot_zs = [], [], []
-
-    for bid in df_full['bird_id'].unique():
-        bird_track = df_full[df_full['bird_id'] == bid].sort_values('timestamp')
-        if len(bird_track) > 1:
-            xs, zs, ys = bird_track['x_m'].values, bird_track['z_m'].values, -bird_track['y_m'].values
-            times = bird_track['timestamp'].values
-            points = np.array([xs, zs, ys]).T.reshape(-1, 1, 3)
-            segments = np.concatenate([points[:-1], points[1:]], axis=1)
-            
-            lc = Line3DCollection(segments, cmap=cmap, norm=norm)
-            lc.set_array(times[:-1])
-            lc.set_linewidth(1.8)
-            lc.set_alpha(1.0)
-            ax.add_collection3d(lc)
-            ax.scatter(xs[-1], zs[-1], ys[-1], color='black', s=50, edgecolors='white', linewidth=0.3)
-            plot_xs.extend(xs); plot_ys.extend(zs); plot_zs.extend(ys)
-
-    if not plot_xs: return
-
-    plot_xs, plot_ys, plot_zs = np.array(plot_xs), np.array(plot_ys), np.array(plot_zs)
-    x_min, x_max = plot_xs.min(), plot_xs.max()
-    y_min, y_max = plot_ys.min(), plot_ys.max()
-    z_min, z_max = plot_zs.min(), plot_zs.max()
-    
-    rx, ry, rz = (x_max-x_min), (y_max-y_min), (z_max-z_min)
-    ax.set_xlim(x_min, x_max)
-    ax.set_ylim(y_min, y_max)
-    ax.set_zlim(z_min, z_max)
-    ax.set_box_aspect((rx * 2.5, ry*1.25, rz*1.8))
-
-    ax.set_xlabel('X [m]', labelpad=15, fontsize=20)
-    ax.set_ylabel('Z [m]', labelpad=25, fontsize=20) 
-    ax.set_zlabel('Y [m]', labelpad=10, fontsize=20) 
-    ax.tick_params(axis='both', which='major', labelsize=16)
-
-    # Colorbar
-    mappable = cm.ScalarMappable(norm=norm, cmap=cmap)
-    mappable.set_array([])
-    cbar = fig.colorbar(mappable, cax=cax, orientation='horizontal')
-    cbar.set_label('Time [s]', labelpad=-65, fontsize=20)
-    cax.tick_params(labelsize=16)
-    cax.xaxis.set_ticks_position('top')
-
-    # Legend
-    dummy_dot = ax.scatter([], [], [], color='black', s=20, label='End Point')
-    ax.legend(handles=[dummy_dot], loc='upper right', bbox_to_anchor=(1.0, 0.9), 
-               fontsize=18, frameon=True, framealpha=0.7)
-
-    ax.view_init(elev=22, azim=-55)
-    
-    os.makedirs("fig", exist_ok=True)
-    
-    # Use a small positive pad_inches so the edges aren't clipped
-    plt.savefig(f"fig/{output_prefix}.png", dpi=300)
-    plt.savefig(f"fig/{output_prefix}.pgf")
-    plt.savefig(f"fig/{output_prefix}.pdf")
-    
-    print(f"Saved optimized plot: fig/{output_prefix}.pgf / .png / .pdf")
-    plt.close(fig)
-
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("raw_l", type=str, default='clip_006')
+    parser.add_argument('raw_r', type=str, default='clip_006')
     parser.add_argument("--save_video", action="store_true")
-    parser.add_argument('--clip', type=str, default='006')
+    parser.add_argument('--clip', type=str, default='clip_006')
     parser.add_argument("--mode", type=str, default="event_frame")
-    parser.add_argument("--paper_plot", action="store_true", help="Generate PGF/PDF plot for paper")
     args = parser.parse_args()
 
+    if args.mode not in ['time_surface', 'event_frame']:
+        print("Invalid mode choice. Use 'time_surface' or 'event_frame'.")
+        sys.exit(1)
+
     # Paths setup
-    raw_l = f"/home/luisgs44/Events/Birds/ev_20251127_115941/clips/clip_{args.clip}.raw"
-    raw_r = f"/home/luisgs44/Events/Birds/ev_20251127_115936/clips/clip_{args.clip}.raw"
-    output_file = f"videos/stereo_output_{args.clip}.mp4"
+    raw_l = args.raw_l
+    raw_r = args.raw_r
+    output_file = os.path.join(SCRIPT_DIR, f"../videos/stereo_output_{args.clip}.mp4")
     type = "evf" if args.mode == 'event_frame' else "ts"
-    csv_l = f'csv/bird_tracking_data_left_{args.clip}_{type}.csv'
-    csv_r = f'csv/bird_tracking_data_right_{args.clip}_{type}.csv'
-    csv_stereo = f'csv/bird_tracking_stereo_data_advanced_{args.clip}_{type}.csv'
-    csv_matches = f'csv/id_matches_{args.clip}_{type}.csv'
-    
-    # Path for the config file
-    config_path = f"config/id_{args.clip}.yaml"
-    if not os.path.exists(config_path):
-        config_path = f"config/id_{args.clip}"
+    csv_l = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_{args.clip}_left.csv')
+    csv_r = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_{args.clip}_right.csv')
+    csv_stereo = os.path.join(SCRIPT_DIR, f'../csv/matching_{args.clip}_{type}.csv')
+    csv_matches = os.path.join(SCRIPT_DIR,f'../csv/id_matches_{args.clip}_{type}.csv')
 
     try:
         if not os.path.exists(csv_stereo):
@@ -407,8 +311,7 @@ def main():
         iter_r = EventsIterator(input_path=raw_r, delta_t=5000)
 
         # Visual 2D 
-        if not args.paper_plot:
-            visualize_stereo_matches(iter_l, iter_r, df_l, df_r, df_stereo, df_matches, mode=args.mode, save_video=args.save_video, output_file=output_file)
+        visualize_stereo_matches(iter_l, iter_r, df_l, df_r, df_stereo, df_matches, mode=args.mode, save_video=args.save_video, output_file=output_file)
 
         # Process Smoothing & Save CSV
         df_full = pd.DataFrame() 
@@ -424,11 +327,6 @@ def main():
             df_export_all.to_csv(save_path_all, index=False)
             print(f"Exported smoothed CSV (ALL IDs) to {save_path_all}")
 
-            valid_ids = load_valid_ids(config_path)
-            if valid_ids is not None:
-                print(f"Filtering dataset to only show config IDs: {valid_ids}")
-                df_full = df_full[df_full['bird_id'].isin(valid_ids)]
-
             # Export requested CSV (Filtered)
             df_export = df_full[['bird_id', 'frame', 'x_m', 'y_m', 'z_m']].copy()
             df_export.columns = ['bird_id', 'frame', 'x_m_smooth', 'y_m_smooth', 'z_m_smooth']
@@ -437,10 +335,7 @@ def main():
             print(f"Exported smoothed CSV (Filtered) to {save_path}")
 
         # Visual 3D
-        if args.paper_plot:
-            save_paper_plot(df_full, output_prefix=f"trajectory_3d_{args.clip}")
-        else:
-            visualize_3d_trajectories(df_full)
+        visualize_3d_trajectories(df_full)
 
     except Exception as e:
         print(f"Error: {e}")

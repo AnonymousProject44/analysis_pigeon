@@ -1,0 +1,15 @@
+baseline: 9.78  
+height_diff: 0.12  
+rotation_order: "yzx"
+image_width: 1280
+image_height: 720
+
+# Right camera 
+yaw_R: 28.0
+pitch_R: -6.20
+roll_R: 18.11
+
+# Left camera 
+yaw_L: 9.0
+pitch_L: -3.22
+roll_L: 18.06

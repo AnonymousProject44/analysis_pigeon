@@ -1,3 +1,4 @@
+import os
 import cv2
 import csv
 import math
@@ -7,9 +8,10 @@ import random
 from ultralytics import YOLO
 from metavision_core.event_io import EventsIterator
 
-# --- CONFIGURATION ---
-MODEL_PATH_TS = "../config/yolo/ts.pt"
-MODEL_PATH_EVF = "../config/evf.pt"
+# CONFIGURATION
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH_TS = os.path.join(SCRIPT_DIR, "../config/yolo/ts.pt")
+MODEL_PATH_EVF = os.path.join(SCRIPT_DIR, "../config/yolo/evf.pt")
 CONFIDENCE = 0.5
 VALIDATION_COUNT = 3
 MAX_GAP_FRAMES = 15
@@ -41,7 +43,7 @@ class AssociationTracker:
         
         for item in detections:
             bbox = item['bbox']
-            center = item['center'] # Centroid from Moments
+            center = item['center'] 
             
             x1, y1, x2, y2 = bbox
             w, h = x2 - x1, y2 - y1
@@ -189,13 +191,14 @@ def main():
     args = parser.parse_args()
     save_csv_bool = args.save_csv.lower() == 'true'
 
-    # Validations
     if args.mode not in ['time_surface', 'event_frame']:
         print("Invalid mode choice. Use 'time_surface' or 'event_frame'.")
         return
 
     event_file_path = args.raw_file
+    raw_name = os.path.splitext(os.path.basename(event_file_path))[0]
     dt = args.dt
+    
     if args.mode == 'time_surface':
         filetype = "ts"
         model = YOLO(MODEL_PATH_TS)
@@ -203,7 +206,9 @@ def main():
         filetype = "evf"
         model = YOLO(MODEL_PATH_EVF)
 
-    filename = f"../csv/tracking_{filetype}_{raw_name}.csv"
+    csv_dir = os.path.join(SCRIPT_DIR, "../csv")
+    os.makedirs(csv_dir, exist_ok=True)
+    filename = os.path.join(csv_dir, f"tracking_{filetype}_{raw_name}.csv")
 
     mv_it = EventsIterator(input_path=event_file_path, delta_t=dt)
     height, width = mv_it.get_size()
@@ -224,7 +229,6 @@ def main():
             display_bgr = cv2.cvtColor(intensity.astype(np.uint8), cv2.COLOR_GRAY2BGR)
         elif args.mode == 'event_frame':
 
-            # Create white background frame
             event_frame = np.full((height, width, 3), 255, dtype=np.uint8)
 
             x = evs['x']
@@ -234,7 +238,6 @@ def main():
             pos_mask = (p == 1)
             neg_mask = (p == 0)
 
-            # BGR: Blue for Positive, Red for Negative
             event_frame[y[pos_mask], x[pos_mask]] = [255, 0, 0]
             event_frame[y[neg_mask], x[neg_mask]] = [0, 0, 255]
 
@@ -248,25 +251,20 @@ def main():
             
             boxes = result.boxes.xyxy.cpu().numpy()
             
-            # Use Masks if available
             if result.masks is not None:
                 
-                # Zip ensures we process box and polygon pair together
                 for box in boxes:
                     
-                    # Full Coordenadas enteras para recortar la imagen (ROI)
                     x1, y1, x2, y2 = map(int, box)
                     
-                    # Clamp 
                     x1 = max(0, x1); y1 = max(0, y1)
                     x2 = min(width, x2); y2 = min(height, y2)
                     
-                    # Crop to working area
                     roi = display_bgr[y1:y2, x1:x2]
                                   
                     mask = None
                 
-                    if roi.size == 0: continue # Avoid errors if invalid box
+                    if roi.size == 0: continue 
 
                     if args.mode == 'time_surface':
                         gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
@@ -281,15 +279,12 @@ def main():
                     if mask is not None:
                         M = cv2.moments(mask)
                         if M['m00'] > 0:
-                            # Compute centroid relative to ROI
                             cx_roi = M['m10'] / M['m00']
                             cy_roi = M['m01'] / M['m00']
                             
-                            # Add the box offset for having global coordinatesSumamos el offset de la caja para tener coordenadas globales
                             cx = x1 + cx_roi
                             cy = y1 + cy_roi
 
-                    # Save result
                     w = box[2] - box[0]
                     h = box[3] - box[1]
                     
@@ -299,7 +294,6 @@ def main():
                         'size': (w, h)
                     })
             
-            # Fallback if model didn't return masks (robustness)
             else:
                 for box in boxes:
                     cx = (box[0] + box[2]) / 2
