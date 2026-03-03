@@ -86,10 +86,10 @@ python scripts/matching_birds.py csv/left.csv csv/right.csv --clip CLIP_ID --mod
 Integrates the full workflow from tracking files to final statistics.
 
 ### Parameters
-`--left_raw` → Path to left raw file
-`--right_raw` → Path to right raw file
-`--clip` → Clip identifier
-`--mode` → Processing mode
+- `--left_raw` → Path to left raw file
+- `--right_raw` → Path to right raw file
+- `--clip` → Clip identifier
+- `--mode` → Processing mode
 
 
 ### Usage
