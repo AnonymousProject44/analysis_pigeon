@@ -104,7 +104,7 @@ python scripts/main.py --left_raw path/to/left.raw --right_raw path/to/right.raw
 - Loads trajectories from `config/trajectories.yaml`
 - Animates birds in `pygame`
 - Runs multiple trackers in parallel:
-  - **MOE (Ours)** – Custom velocity-based tracker
+  - **MOE (Ours)** – Custom tracker
   - **CSRT**
   - **KCF**
   - **NANO**
