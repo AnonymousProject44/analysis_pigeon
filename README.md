@@ -72,7 +72,7 @@ It:
 ### Parameters
 - `left_tracking_csv`
 - `right_tracking_csv`
-- `--clip` → Clip identifier
+- `--clip` → Clip identifier (e.g. 006)
 - `--mode` → Processing mode
 
 ### Usage
@@ -88,7 +88,7 @@ Integrates the full workflow from tracking files to final statistics.
 ### Parameters
 - `--left_raw` → Path to left raw file
 - `--right_raw` → Path to right raw file
-- `--clip` → Clip identifier
+- `--clip` → Clip identifier (e.g. 006)
 - `--mode` → Processing mode
 
 
@@ -136,3 +136,5 @@ A `requirements.txt` file is provided for dependency installation.
 ```bash
 pip install -r requirements.txt
 ```
+
+To install the Metavision SDK for Python, please refer to the official [Prophesee Metavision documentation](https://docs.prophesee.ai/stable/installation/index.html) for the exact installation instructions for your operating system.
