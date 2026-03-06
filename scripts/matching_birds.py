@@ -139,7 +139,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('left_csv', type=str, default="../csv/tracking_ev_clip_006_left.csv", help="Path to the tracking CSV for the left camera")
     parser.add_argument('right_csv', type=str, default="../csv/tracking_ev_clip_006_right.csv", help="Path to the tracking CSV for the right camera")
-    parser.add_argument('--clip', type=str, default="clip_006", help="Clip ID")
+    parser.add_argument('--clip', type=str, default="006", help="Clip ID")
     parser.add_argument('--mode', type=str, default='event_frame')
     args = parser.parse_args()
 
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         sys.exit(1)
     
     suffix = "ts" if args.mode == 'time_surface' else "evf"
-    output_csv = os.path.join(SCRIPT_DIR, f"../csv/matching_{args.clip}_{suffix}.csv")
+    output_csv = os.path.join(SCRIPT_DIR, f"../csv/matching_clip_{args.clip}_{suffix}.csv")
     config_dir = os.path.join(SCRIPT_DIR, "../config/calibration/")
     try:
         df_l, df_r = pd.read_csv(args.left_csv), pd.read_csv(args.right_csv)
@@ -158,7 +158,7 @@ if __name__ == "__main__":
         
         df_l, df_r = extract_features(df_l), extract_features(df_r)
         results = match_stereo_tracks_advanced(df_l, df_r)
-        matches_csv = os.path.join(SCRIPT_DIR, f"../csv/id_matches_{args.clip}_{suffix}.csv")
+        matches_csv = os.path.join(SCRIPT_DIR, f"../csv/id_matches_clip_{args.clip}_{suffix}.csv")
         if not results.empty: results.to_csv(matches_csv, index=False)
 
         if not results.empty:
@@ -200,7 +200,7 @@ if __name__ == "__main__":
             
             df_stats = pd.DataFrame(stats)
             df_out.to_csv(output_csv, index=False)
-            stats_csv = os.path.join(SCRIPT_DIR, f"../csv/bird_stats_{args.clip}_{suffix}.csv")
+            stats_csv = os.path.join(SCRIPT_DIR, f"../csv/bird_stats_clip_{args.clip}_{suffix}.csv")
             df_stats.to_csv(stats_csv, index=False)
             print(f"Global Avg Wingbeat: {df_stats['wingbeat_hz'].median():.2f} Hz")
             print(df_stats)

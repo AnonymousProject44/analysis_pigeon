@@ -38,8 +38,8 @@ def main():
     filetype = "ts" if args.mode == 'time_surface' else "evf"
 
     # Construct the expected paths for the output CSVs
-    left_csv = os.path.abspath(os.path.join(script_dir, f"../csv/tracking_{filetype}_{args.clip}_left.csv"))
-    right_csv = os.path.abspath(os.path.join(script_dir, f"../csv/tracking_{filetype}_{args.clip}_right.csv"))
+    left_csv = os.path.abspath(os.path.join(script_dir, f"../csv/tracking_{filetype}_clip_{args.clip}_left.csv"))
+    right_csv = os.path.abspath(os.path.join(script_dir, f"../csv/tracking_{filetype}_clip_{args.clip}_right.csv"))
 
     # Execute stereo matching using the newly generated data
     matching_cmd = [

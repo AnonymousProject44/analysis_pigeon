@@ -292,10 +292,10 @@ def main():
     raw_r = args.raw_r
     output_file = os.path.join(SCRIPT_DIR, f"../videos/stereo_output_{args.clip}.mp4")
     type = "evf" if args.mode == 'event_frame' else "ts"
-    csv_l = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_{args.clip}_left.csv')
-    csv_r = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_{args.clip}_right.csv')
-    csv_stereo = os.path.join(SCRIPT_DIR, f'../csv/matching_{args.clip}_{type}.csv')
-    csv_matches = os.path.join(SCRIPT_DIR,f'../csv/id_matches_{args.clip}_{type}.csv')
+    csv_l = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_clip_{args.clip}_left.csv')
+    csv_r = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_clip_{args.clip}_right.csv')
+    csv_stereo = os.path.join(SCRIPT_DIR, f'../csv/matching_clip_{args.clip}_{type}.csv')
+    csv_matches = os.path.join(SCRIPT_DIR,f'../csv/id_matches_clip_{args.clip}_{type}.csv')
 
     try:
         if not os.path.exists(csv_stereo):
