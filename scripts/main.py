@@ -3,6 +3,8 @@ import subprocess
 import sys
 import os
 
+from naming import build_raw_tag
+
 def run_command(command):
     # Execute a shell command and handle potential errors gracefully
     print(f"Executing: {' '.join(command)}")
@@ -38,8 +40,8 @@ def main():
     filetype = "ts" if args.mode == 'time_surface' else "evf"
 
     # Construct the expected paths for the output CSVs
-    left_csv = os.path.abspath(os.path.join(script_dir, f"../csv/tracking_{filetype}_clip_{args.clip}_left.csv"))
-    right_csv = os.path.abspath(os.path.join(script_dir, f"../csv/tracking_{filetype}_clip_{args.clip}_right.csv"))
+    left_csv = os.path.abspath(os.path.join(script_dir, f"../csv/tracking_{filetype}_{build_raw_tag(args.left_raw)}_left.csv"))
+    right_csv = os.path.abspath(os.path.join(script_dir, f"../csv/tracking_{filetype}_{build_raw_tag(args.right_raw)}_right.csv"))
 
     # Execute stereo matching using the newly generated data
     matching_cmd = [

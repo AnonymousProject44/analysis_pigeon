@@ -9,7 +9,8 @@ from mpl_toolkits.mplot3d.art3d import Line3DCollection
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 from metavision_core.event_io import EventsIterator
-import re  
+from naming import build_raw_tag
+import re
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -290,12 +291,13 @@ def main():
     # Paths setup
     raw_l = args.raw_l
     raw_r = args.raw_r
-    output_file = os.path.join(SCRIPT_DIR, f"../videos/stereo_output_{args.clip}.mp4")
+    tag = build_raw_tag(raw_l)
+    output_file = os.path.join(SCRIPT_DIR, f"../videos/stereo_output_{tag}.mp4")
     type = "evf" if args.mode == 'event_frame' else "ts"
-    csv_l = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_clip_{args.clip}_left.csv')
-    csv_r = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_clip_{args.clip}_right.csv')
-    csv_stereo = os.path.join(SCRIPT_DIR, f'../csv/matching_clip_{args.clip}_{type}.csv')
-    csv_matches = os.path.join(SCRIPT_DIR,f'../csv/id_matches_clip_{args.clip}_{type}.csv')
+    csv_l = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_{tag}_left.csv')
+    csv_r = os.path.join(SCRIPT_DIR, f'../csv/tracking_{type}_{build_raw_tag(raw_r)}_right.csv')
+    csv_stereo = os.path.join(SCRIPT_DIR, f'../csv/matching_{tag}_{type}.csv')
+    csv_matches = os.path.join(SCRIPT_DIR,f'../csv/id_matches_{tag}_{type}.csv')
 
     try:
         if not os.path.exists(csv_stereo):
@@ -323,14 +325,14 @@ def main():
             # Save ALL IDs (before filtering)
             df_export_all = df_full[['bird_id', 'frame', 'x_m', 'y_m', 'z_m']].copy()
             df_export_all.columns = ['bird_id', 'frame', 'x_m_smooth', 'y_m_smooth', 'z_m_smooth']
-            save_path_all = f"csv/smoothed_bird_data_{args.clip}_{type}_all.csv"
+            save_path_all = f"csv/smoothed_bird_data_{tag}_{type}_all.csv"
             df_export_all.to_csv(save_path_all, index=False)
             print(f"Exported smoothed CSV (ALL IDs) to {save_path_all}")
 
             # Export requested CSV (Filtered)
             df_export = df_full[['bird_id', 'frame', 'x_m', 'y_m', 'z_m']].copy()
             df_export.columns = ['bird_id', 'frame', 'x_m_smooth', 'y_m_smooth', 'z_m_smooth']
-            save_path = f"csv/smoothed_bird_data_{args.clip}_{type}.csv"
+            save_path = f"csv/smoothed_bird_data_{tag}_{type}.csv"
             df_export.to_csv(save_path, index=False)
             print(f"Exported smoothed CSV (Filtered) to {save_path}")
 
