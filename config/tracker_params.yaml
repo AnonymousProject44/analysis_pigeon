@@ -1,0 +1,10 @@
+# Tuned by optimize_tracker.py (score 0.885 vs baseline 0.839), except where marked "set by hand"
+# vel_tol_mult and bridge_rate_mult multiply the per-clip estimated median velocity
+vel_tol_mult: 3.862911906046048
+age_max: 4  # set by hand
+gap_max: 15
+hard_max: 32.137641448726576
+bridge_rate_mult: 7.517121211868085
+vel_smoothing: 0.0682298200347956
+min_total: 27  # set by hand
+wing_weight: 0.6143732469489966

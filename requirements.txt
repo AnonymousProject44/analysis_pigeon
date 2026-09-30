@@ -1,0 +1,13 @@
+# Python 3.12. The Metavision SDK is not on PyPI: install it from Prophesee
+# (https://docs.prophesee.ai/stable/installation/index.html) and make its
+# Python bindings visible to this environment.
+numpy==2.4.2
+pandas==3.0.1
+scipy==1.17.1
+matplotlib==3.10.8
+PyYAML==6.0.3
+networkx==3.6.1
+opencv-python==4.13.0.92
+ultralytics==8.4.21
+torch==2.10.0
+torchvision==0.25.0
