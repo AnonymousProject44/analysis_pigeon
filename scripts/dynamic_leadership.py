@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from scipy.signal import correlate
 
 from filter_trajectories3d import positions, CSV_DIR
 
@@ -82,16 +83,12 @@ def lead_delay(di, fi, dj, fj, max_lag):
     lag = min(max_lag, (len(common) - 5) // 2)  # cap the search to the available overlap
     if lag < 2: return None, 0.0
     a, b = di[ia], dj[ib]
-    best = (-2.0, 0)
-    for tau in range(-lag, lag + 1):
-        if tau >= 0:
-            x, y = a[:len(a) - tau], b[tau:]
-        else:
-            x, y = a[-tau:], b[:len(b) + tau]
-        if len(x) < 5: continue
-        c = float(np.mean(np.sum(x * y, axis=1)))  # mean cos angle between directions
-        if c > best[0]: best = (c, tau)
-    return best[1], best[0]
+    n = len(a)
+    s = correlate(b[:, 0], a[:, 0], method='fft') + correlate(b[:, 1], a[:, 1], method='fft')
+    s = s[n - 1 - lag:n + lag]
+    c = s / (n - np.abs(np.arange(-lag, lag + 1)))
+    k = int(np.argmax(c))
+    return k - lag, float(c[k])
 
 def leadership_scores(dirs, frames, max_lag, min_overlap):
     """Mean lead delay (frames) per bird over all sufficiently-overlapping pairs."""

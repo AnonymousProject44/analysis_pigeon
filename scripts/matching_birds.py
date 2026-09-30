@@ -225,7 +225,7 @@ if __name__ == "__main__":
     parser.add_argument('--clip', type=str, default="006", help="Clip ID")
     parser.add_argument('--mode', type=str, default='event_frame')
     parser.add_argument('--save_plot', action='store_true', help="Save a 3D PDF plot of the matched trajectories")
-    parser.add_argument('--dt', type=int, default=10000, help="Frame delta time in microseconds (must match the tracking dt)")
+    parser.add_argument('--dt', type=int, default=5000, help="Frame delta time in microseconds (must match the tracking dt)")
     parser.add_argument('--extrinsics', type=str, default=None, help="Extrinsics YAML (default: auto from ~/Events/Birds/{date}/{spot}/extrinsics.yaml, else config)")
     parser.add_argument('--birds_dir', type=str, default=os.path.expanduser("~/Events/Birds"), help="Dataset root used to auto-locate the session extrinsics")
     args = parser.parse_args()

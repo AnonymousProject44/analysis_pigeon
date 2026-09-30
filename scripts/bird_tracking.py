@@ -500,7 +500,7 @@ def main():
     parser.add_argument('raw_file', type=str, help="Choose .raw clip to process")
     parser.add_argument('--mode', type=str, default='time_surface', help="Mode of processing: 'time_surface' or 'event_frame'")
     parser.add_argument('--camera', type=str, default='left', help="Processing camera: 'left' or 'right'")
-    parser.add_argument('--dt', type=int, default=10000, help="Delta time in microseconds")
+    parser.add_argument('--dt', type=int, default=5000, help="Delta time in microseconds")
     parser.add_argument('--save_csv', type=str, default='true')
     parser.add_argument('--vis', action='store_true', help="Show live tracking visualization per bird")
     parser.add_argument('--save_video', action='store_true', help="Save the tracking visualization as a video")
