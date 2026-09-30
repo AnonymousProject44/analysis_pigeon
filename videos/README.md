@@ -1,1 +1,1 @@
-## Download your analysis videos here.
+## The scripts write their videos here.

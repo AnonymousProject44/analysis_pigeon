@@ -1,1 +1,1 @@
-## Download your analysis csv files here.
+## The scripts write their CSV outputs here.

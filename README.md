@@ -6,6 +6,28 @@ The system leverages **event cameras** to transform raw event streams into accur
 
 ---
 
+# Dataset
+
+The raw event recordings are available on OSF: https://osf.io/dur8z/overview?view_only=e77a171b1d3e4d4aaf1ea5ca90618e4c
+
+The scripts expect the dataset laid out as `{date}/{spot}/{Left|Right}/clips/clip_{xxx}.raw`, and flight tags follow the same structure (`{date}_Spot{n}_clip_{xxx}`).
+
+**Extrinsics.** Each recording session has its own stereo extrinsics at `{date}/{spot}/extrinsics.yaml` in the dataset. `matching_birds.py` loads them from the dataset root given by `--birds_dir` (default `~/Events/Birds`), and falls back to `config/calibration/extrinsics.yaml` only if the session file is missing.
+
+**Spot names vs. the paper.** Sequence IDs in the paper number the spots across both days, so the repository's spot names map to them as follows:
+
+| Repository | Paper |
+|---|---|
+| `20251127_Spot1` | S1 |
+| `20260703_Spot1` | S2 |
+| `20260703_Spot2` | S3 |
+| `20260703_Spot3` | S4 |
+| `20260703_Spot4` | S5 |
+
+For example, `20260703_Spot1_clip_004` is flight S2-004 in the paper.
+
+---
+
 # Configuration Files
 
 The system depends on specific configuration files located inside the `config/` directory (extrinsic and intrinsic parameters, and yolo models).
@@ -45,7 +67,7 @@ Features:
 
 ### Usage
 ```bash
-python scripts/bird_tracking.py path/to/clip.raw --mode event_frame --dt DELTA_TIME --save_csv true
+python scripts/bird_tracking.py path/to/clip.raw --mode time_surface --dt 5000 --save_csv true
 ``` 
 
 ## Stereo Matching & 3D Reconstruction
@@ -68,7 +90,7 @@ It:
 
 ### Usage
 ```bash
-python scripts/matching_birds.py csv/left.csv csv/right.csv --clip CLIP_ID --mode event_frame
+python scripts/matching_birds.py csv/left.csv csv/right.csv --clip CLIP_ID --mode time_surface
 ```
 
 ## Stereo Diagnostic Viewer
@@ -84,7 +106,7 @@ Plays the left/right raw clips side by side and overlays the reconstructed 3D tr
 
 ### Usage
 ```bash
-python scripts/stereo_visualizer.py path/to/left.raw path/to/right.raw --clip CLIP_ID --mode event_frame
+python scripts/stereo_visualizer.py path/to/left.raw path/to/right.raw --clip CLIP_ID --mode time_surface
 ```
 ---
 # Full Pipeline & Biomechanical Analysis
@@ -101,7 +123,7 @@ Integrates the full workflow from tracking files to final statistics.
 
 ### Usage
 ```bash
-python scripts/main.py --left_raw path/to/left.raw --right_raw path/to/right.raw --clip CLIP_ID --mode event_frame
+python scripts/main.py --left_raw path/to/left.raw --right_raw path/to/right.raw --clip CLIP_ID --mode time_surface
 ```
 ---
 # Trajectory Curation
