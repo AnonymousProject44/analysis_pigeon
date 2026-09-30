@@ -61,7 +61,7 @@ Features:
 ### Parameters
 - `raw_file_path`
 - `--mode` → time_surface or event_frame
-- `--camera` → cCamera identifier (Left or Right)
+- `--camera` → Camera identifier (Left or Right)
 - `--dt` → Delta time in microseconds (default: 5000)
 - `--save_csv` → true or false
 
